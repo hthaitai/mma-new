@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, TextInput, Alert, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Button, TextInput, Alert, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { getAllProgress, createProgress } from '../services/progressService';
 import axios from 'axios';
 import { LineChart } from 'react-native-chart-kit';
 import { BarChart } from 'react-native-chart-kit';
+import { useNavigation } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -20,6 +21,7 @@ const getUserId = async () => {
 };
 
 const ProgressScreen = () => {
+  const navigation = useNavigation();
   const [plan, setPlan] = useState(null);
   const [stats, setStats] = useState({
     consecutive_no_smoke_days: 0,
@@ -141,6 +143,12 @@ const ProgressScreen = () => {
             <Text>Ngày bắt đầu: {new Date(plan.start_date).toLocaleDateString()}</Text>
             <Text>Ngày mục tiêu: {new Date(plan.target_quit_date).toLocaleDateString()}</Text>
             <Text>Lý do: {plan.reason}</Text>
+            <TouchableOpacity
+              style={styles.achievementButton}
+              onPress={() => navigation.navigate('Achievements')}
+            >
+              <Text style={styles.achievementButtonText}>🏆 Xem thành tựu</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <Text>Chưa có kế hoạch</Text>
@@ -308,6 +316,23 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 8,
     backgroundColor: '#fafbfc',
+  },
+  achievementButton: {
+    backgroundColor: '#2196f3',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  achievementButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
