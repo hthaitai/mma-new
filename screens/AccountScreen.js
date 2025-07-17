@@ -18,7 +18,7 @@ export default function AccountScreen({ navigation }) {
     const token = await AsyncStorage.getItem('token');
 
     try {
-      const res = await fetch(`http://10.0.2.2:8080/api/user/upgrade/${user.id}`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/user/upgrade/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

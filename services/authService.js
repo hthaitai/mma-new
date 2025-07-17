@@ -1,7 +1,6 @@
 // services/authService.js
 import axios from 'axios';
-const API_URL = 'http://10.0.2.2:8080/api/auth'; // Android Emulator
-// Hoặc dùng IP LAN nếu là thiết bị thật
+const API_URL = 'http://192.168.2.4:5000/api/auth'; // LAN for both Android & iOS
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,3 +24,5 @@ export const register = async (name, email, password) => {
     throw err.response?.data?.message || 'Đăng ký thất bại';
   }
 };
+
+

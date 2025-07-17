@@ -17,11 +17,15 @@ const handleLogin = async () => {
   setLoading(true);
   try {
     const data = await loginUser(email, password);
+    console.log('USER LOGIN DATA:', data.user); // DEBUG: log user data
 
 if (data.user?.token) {
   await AsyncStorage.setItem('token', data.user.token);
   await AsyncStorage.setItem('user', JSON.stringify(data.user));
-  navigation.replace('MainApp');
+  navigation.reset({
+    index: 0,
+    routes: [{ name: 'MainApp' }],
+  });
 } else {
   Alert.alert('Đăng nhập thất bại', 'Không nhận được token');
 }
