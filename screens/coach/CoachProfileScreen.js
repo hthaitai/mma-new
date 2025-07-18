@@ -30,7 +30,7 @@ export default function CoachProfileScreen() {
   const fetchProfile = async (userId, token) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://192.168.2.4:5000/api/coach/user/${userId}`, {
+      const res = await fetch(`http://192.168.243.1:5000/api/coach/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -57,7 +57,7 @@ export default function CoachProfileScreen() {
     }
     try {
       setLoading(true);
-      const res = await fetch('http://192.168.2.4:5000/api/coach/', {
+      const res = await fetch('http://192.168.243.1:5000/api/coach/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function CoachProfileScreen() {
     }
     try {
       setLoading(true);
-      const res = await fetch(`http://192.168.2.4:5000/api/coach/${profileId}`, {
+      const res = await fetch(`http://192.168.243.1:5000/api/coach/${profileId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ export default function CoachProfileScreen() {
       { text: 'Xóa', style: 'destructive', onPress: async () => {
         try {
           setLoading(true);
-          const res = await fetch(`http://192.168.2.4:5000/api/coach/${profile._id}`, {
+          const res = await fetch(`http://192.168.243.1:5000/api/coach/${profile._id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${user.token}` }
           });
