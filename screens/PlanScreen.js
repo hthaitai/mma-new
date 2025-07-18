@@ -7,7 +7,7 @@ import SmokingForm from '../components/smokingstatusform';
 import { Ionicons } from '@expo/vector-icons';
 
 const PlanScreen = () => {
-  const [smokingStatus, setSmokingStatus] = useState(null);
+  const [smokingStatusList, setSmokingStatusList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFormModal, setShowFormModal] = useState(false);
   const navigation = useNavigation();
@@ -20,14 +20,21 @@ const PlanScreen = () => {
       if (id && token) {
         const data = await getStatusSmoking(id, token);
         console.log('Smoking status data:', data);
-        if (data) {
-          setSmokingStatus(data.smokingStatus || data);
+        if (data && data.smokingStatus && Array.isArray(data.smokingStatus)) {
+          // Sắp xếp theo thời gian tạo mới nhất
+          const sortedData = data.smokingStatus.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setSmokingStatusList(sortedData);
+        } else if (data && Array.isArray(data)) {
+          const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setSmokingStatusList(sortedData);
         } else {
+          setSmokingStatusList([]);
           setShowFormModal(true);
         }
       }
     } catch (error) {
       console.error('Failed to fetch smoking status:', error.message);
+      setSmokingStatusList([]);
     } finally {
       setLoading(false);
     }
@@ -84,28 +91,57 @@ const PlanScreen = () => {
       >
         <Text style={styles.addButtonText}>Nhập thông tin hút thuốc</Text>
       </TouchableOpacity>
-      {smokingStatus ? (
-        <View style={styles.card}>
-          {/* Icon bút chì nằm trong card, góc phải trên */}
-          <TouchableOpacity
-            style={styles.editButtonInCard}
-            onPress={() => setShowFormModal(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="pencil" size={18} color="#007bff" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Thông tin hút thuốc</Text>
-          <Text style={styles.info}>Số điếu/ngày: <Text style={styles.value}>{smokingStatus.cigarettes_per_day}</Text></Text>
-          <Text style={styles.info}>Giá 1 bao: <Text style={styles.value}>{smokingStatus.cost_per_pack} VND</Text></Text>
-          <Text style={styles.info}>
-            Ngày bắt đầu: <Text style={styles.value}>{new Date(smokingStatus.start_date).toLocaleDateString()}</Text>
-          </Text>
-          <TouchableOpacity
-            onPress={() => setShowFormModal(true)}
-            style={styles.updateButton}
-          >
-            <Text style={styles.updateButtonText}>Cập nhật thông tin</Text>
-          </TouchableOpacity>
+      {smokingStatusList.length > 0 ? (
+        <View style={styles.listContainer}>
+          <Text style={styles.listTitle}>Lịch sử thông tin hút thuốc</Text>
+          {smokingStatusList.map((status, index) => (
+            <View key={status._id} style={[styles.card, index === 0 && styles.latestCard]}>
+              {/* Icon bút chì chỉ hiện ở record mới nhất */}
+              {index === 0 && (
+                <TouchableOpacity
+                  style={styles.editButtonInCard}
+                  onPress={() => setShowFormModal(true)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="pencil" size={18} color="#007bff" />
+                </TouchableOpacity>
+              )}
+              
+              {/* Badge cho record mới nhất */}
+              {index === 0 && (
+                <View style={styles.latestBadge}>
+                  <Text style={styles.latestBadgeText}>Mới nhất</Text>
+                </View>
+              )}
+              
+              <Text style={[styles.title, index === 0 ? styles.latestTitle : styles.historyTitle]}>
+                {index === 0 ? 'Thông tin hút thuốc hiện tại' : `Lần cập nhật #${smokingStatusList.length - index}`}
+              </Text>
+              
+              <Text style={styles.info}>
+                Số điếu/ngày: <Text style={styles.value}>{status.cigarettes_per_day}</Text>
+              </Text>
+              <Text style={styles.info}>
+                Giá 1 bao: <Text style={styles.value}>{status.cost_per_pack.toLocaleString()} VND</Text>
+              </Text>
+              <Text style={styles.info}>
+                Ngày bắt đầu: <Text style={styles.value}>{new Date(status.start_date).toLocaleDateString('vi-VN')}</Text>
+              </Text>
+              <Text style={styles.info}>
+                Ngày tạo: <Text style={styles.value}>{new Date(status.createdAt).toLocaleDateString('vi-VN')} {new Date(status.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</Text>
+              </Text>
+              
+              {/* Nút cập nhật chỉ hiện ở record mới nhất */}
+              {index === 0 && (
+                <TouchableOpacity
+                  onPress={() => setShowFormModal(true)}
+                  style={styles.updateButton}
+                >
+                  <Text style={styles.updateButtonText}>Cập nhật thông tin</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
         </View>
       ) : (
         <Text style={styles.noData}>Chưa có dữ liệu hút thuốc</Text>
@@ -137,25 +173,65 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f4f8fb',
   },
+  listContainer: {
+    width: '100%',
+    maxWidth: 400,
+  },
+  listTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#007bff',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
     width: '100%',
-    maxWidth: 400,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 6,
-    marginBottom: 24,
+    marginBottom: 16,
+    position: 'relative',
+  },
+  latestCard: {
+    borderWidth: 2,
+    borderColor: '#007bff',
+    shadowColor: '#007bff',
+    shadowOpacity: 0.2,
+    elevation: 8,
+  },
+  latestBadge: {
+    position: 'absolute',
+    top: -8,
+    left: 16,
+    backgroundColor: '#007bff',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    zIndex: 10,
+  },
+  latestBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   title: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#007bff',
     marginBottom: 16,
     textAlign: 'center',
+  },
+  latestTitle: {
+    color: '#007bff',
+    fontSize: 20,
+  },
+  historyTitle: {
+    color: '#666',
+    fontSize: 16,
   },
   info: {
     fontSize: 16,
