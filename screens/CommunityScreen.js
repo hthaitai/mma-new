@@ -966,10 +966,8 @@ export default function CommunityScreen() {
 
             <TouchableOpacity
               style={[
-                {
-                  filterButton: styles.filterButton,
-                  activeFilter: filter === "withImage" && styles.activeFilter,
-                },
+                styles.filterButton,
+                filter === "withImage" && styles.activeFilter,
               ]}
               onPress={() => setFilter("withImage")}
             >
