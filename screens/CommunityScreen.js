@@ -138,16 +138,9 @@ const deletePost = async (postId) => {
 };
 
 const getComments = async (postId) => {
-  return [
-    {
-      id: Date.now(),
-      authorId: 4,
-      authorName: "user4",
-      authorAvatar: "https://i.pravatar.cc/150?img=4",
-      content: "Bài viết rất hay!",
-      timestamp: new Date().toISOString(),
-    },
-  ];
+  const posts = await getPosts();
+  const post = posts.find((p) => p.id === postId);
+  return post ? post.comments : [];
 };
 
 const createComment = async (commentData) => {
@@ -576,6 +569,7 @@ const LeaderboardSection = ({ leaderboardData }) => {
     </LinearGradient>
   );
 };
+
 export default function CommunityScreen() {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({ text: "", image: null });
@@ -600,6 +594,17 @@ export default function CommunityScreen() {
     fetchPosts();
     fetchLeaderboard();
   }, []);
+
+  useEffect(() => {
+    // Initialize comments state with comments from posts
+    const initialComments = posts.reduce((acc, post) => {
+      if (post.comments && post.comments.length > 0) {
+        acc[post.id] = post.comments;
+      }
+      return acc;
+    }, {});
+    setComments(initialComments);
+  }, [posts]);
 
   useEffect(() => {
     // Update isSearchOrFilterActive based on searchQuery and filter
@@ -650,7 +655,10 @@ export default function CommunityScreen() {
   const fetchCommentsForPost = async (postId) => {
     try {
       const fetchedComments = await getComments(postId);
-      setComments((prev) => ({ ...prev, [postId]: fetchedComments }));
+      setComments((prev) => ({
+        ...prev,
+        [postId]: fetchedComments,
+      }));
     } catch (err) {
       console.error("Error fetching comments:", err);
       setComments((prev) => ({ ...prev, [postId]: [] }));
@@ -711,7 +719,9 @@ export default function CommunityScreen() {
         });
         setPosts(
           posts.map((post) =>
-            post.id === editingPost.id ? { ...post, ...updatedPost } : post
+            post.id === editingPost.id
+              ? { ...post, ...updatedPost, comments: post.comments } // Preserve existing comments
+              : post
           )
         );
         setEditingPost(null);
@@ -748,6 +758,11 @@ export default function CommunityScreen() {
           try {
             await deletePost(id);
             setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id));
+            setComments((prev) => {
+              const newComments = { ...prev };
+              delete newComments[id];
+              return newComments;
+            });
           } catch (err) {
             console.error("Error deleting post:", err);
             Alert.alert("Lỗi", "Không thể xoá bài viết");
@@ -794,10 +809,14 @@ export default function CommunityScreen() {
         timestamp: new Date().toISOString(),
       };
       const createdComment = await createComment(commentData);
-      setComments((prev) => ({
-        ...prev,
-        [postId]: [...(prev[postId] || []), createdComment],
-      }));
+      setComments((prev) => {
+        const existingComments =
+          prev[postId] || posts.find((p) => p.id === postId)?.comments || [];
+        return {
+          ...prev,
+          [postId]: [...existingComments, createdComment],
+        };
+      });
       setPosts(
         posts.map((post) =>
           post.id === postId
@@ -947,8 +966,10 @@ export default function CommunityScreen() {
 
             <TouchableOpacity
               style={[
-                styles.filterButton,
-                filter === "withImage" && styles.activeFilter,
+                {
+                  filterButton: styles.filterButton,
+                  activeFilter: filter === "withImage" && styles.activeFilter,
+                },
               ]}
               onPress={() => setFilter("withImage")}
             >
@@ -1190,7 +1211,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginTop: 15,
     marginBottom: 10,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)", // Replaced shadow props
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
   searchIcon: {
     marginRight: 8,
@@ -1228,7 +1249,7 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 15,
     borderRadius: 16,
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)", // Replaced shadow props
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
   },
   formTitle: {
     fontSize: 18,
@@ -1311,7 +1332,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginVertical: 8,
     borderRadius: 16,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)", // Replaced shadow props
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
     overflow: "hidden",
   },
   postHeader: {
@@ -1508,7 +1529,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     margin: 15,
     padding: 15,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)", // Replaced shadow props
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
   },
   sectionHeader: {
     flexDirection: "row",
@@ -1534,7 +1555,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 15,
     marginRight: 15,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.1)", // Replaced shadow props
+    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
   },
   benefitIcon: {
     marginBottom: 10,
@@ -1553,7 +1574,7 @@ const styles = StyleSheet.create({
   storyCard: {
     borderRadius: 16,
     padding: 20,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.1)", // Replaced shadow props
+    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
   },
   storyHeader: {
     flexDirection: "row",
@@ -1620,7 +1641,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     margin: 15,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)", // Replaced shadow props
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
   },
   leaderboardRow: {
     flexDirection: "row",
@@ -1650,7 +1671,7 @@ const styles = StyleSheet.create({
     color: "#3b82f6",
   },
   leaderboardName: {
-    tetteflex: 1,
+    flex: 1,
     fontSize: 16,
     color: "#374151",
     marginLeft: 10,
