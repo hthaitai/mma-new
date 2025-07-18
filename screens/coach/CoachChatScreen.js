@@ -28,7 +28,7 @@ export default function CoachChatScreen() {
     try {
       setSessionLoading(true);
       setError(null);
-      const res = await fetch(`http://192.168.243.1:5000/api/chat/sessions/${userId}`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/chat/sessions/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -56,7 +56,7 @@ export default function CoachChatScreen() {
 
   const handleCreateNewSession = async (userId, token) => {
     try {
-      const res = await fetch(`http://192.168.243.1:5000/api/chat/`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/chat/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export default function CoachChatScreen() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`http://192.168.243.1:5000/api/chat/${chatId}`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/chat/${chatId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -114,7 +114,7 @@ export default function CoachChatScreen() {
     setSending(true);
     const user = userRef.current;
     try {
-      const res = await fetch(`http://192.168.243.1:5000/api/chat/${chatId}/message`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/chat/${chatId}/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

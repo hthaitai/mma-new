@@ -24,7 +24,7 @@ if (data.user?.token) {
   await AsyncStorage.setItem('user', JSON.stringify(data.user));
   navigation.reset({
     index: 0,
-    routes: [{ name: 'MainApp' }],
+    routes: [{ name: 'AuthLoading' }],
   });
 } else {
   Alert.alert('Đăng nhập thất bại', 'Không nhận được token');

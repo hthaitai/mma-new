@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TextInput, 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { Picker } from '@react-native-picker/picker';
 
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState([]);
@@ -34,7 +35,7 @@ export default function NotificationsScreen() {
   // Lấy tất cả user (cho coach chọn khi tạo thông báo)
   const fetchAllUsers = async (token) => {
     try {
-      const res = await fetch('http://192.168.243.1:5000/api/user/', {
+      const res = await fetch('http://10.0.2.2:5000/api/user/', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -46,7 +47,7 @@ export default function NotificationsScreen() {
   const fetchAllNotifications = async (token) => {
     try {
       setLoading(true);
-      const res = await fetch('http://192.168.243.1:5000/api/notification/', {
+      const res = await fetch('http://10.0.2.2:5000/api/notification/', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -60,7 +61,7 @@ export default function NotificationsScreen() {
   const fetchNotificationsByUser = async (userId, token) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://192.168.243.1:5000/api/notification/user/${userId}`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/notification/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -72,13 +73,13 @@ export default function NotificationsScreen() {
 
   // Tạo thông báo mới (coach)
   const handleCreate = async () => {
-    if (!form.userId || !form.message || !form.type || !form.schedule) {
+    if (!form.message || !form.type || !form.schedule) {
       Alert.alert('Vui lòng nhập đủ thông tin');
       return;
     }
     try {
       setLoading(true);
-      const res = await fetch('http://192.168.243.1:5000/api/notification/', {
+      const res = await fetch('http://10.0.2.2:5000/api/notification/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,6 +90,7 @@ export default function NotificationsScreen() {
           message: form.message,
           type: form.type,
           schedule: form.schedule,
+          // Không gửi userId
         })
       });
       const data = await res.json();
@@ -110,7 +112,7 @@ export default function NotificationsScreen() {
     if (!editing) return;
     try {
       setLoading(true);
-      const res = await fetch(`http://192.168.243.1:5000/api/notification/${editing._id}`, {
+      const res = await fetch(`http://10.0.2.2:5000/api/notification/${editing._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

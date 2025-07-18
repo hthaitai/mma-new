@@ -1,6 +1,6 @@
 // services/authService.js
 import axios from 'axios';
-const API_URL = 'http://192.168.243.1:5000/api/auth'; // LAN for both Android & iOS
+const API_URL = 'http://10.0.2.2:5000/api/auth'; // LAN for both Android & iOS
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
